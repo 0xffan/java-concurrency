@@ -13,6 +13,10 @@ public class BatchSubmittingExample {
      *
      */
     public static void batchSubmittingViaInvokeAll() {
+        /* `newWorkStealingPool()` is part of Java 8 and returns an executor of
+           type ForkJoinPool which works slightly different than normal executors.
+           Instead of using a fixed size thread-pool ForkJoinPools are created for
+           a given parallelism size which per default is the number of available cores of the hosts CPU.*/
         ExecutorService executor = Executors.newWorkStealingPool();
 
         List<Callable<String>> tasks = Arrays.asList(
