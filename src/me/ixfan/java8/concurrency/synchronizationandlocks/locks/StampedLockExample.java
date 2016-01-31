@@ -2,7 +2,6 @@ package me.ixfan.java8.concurrency.synchronizationandlocks.locks;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
