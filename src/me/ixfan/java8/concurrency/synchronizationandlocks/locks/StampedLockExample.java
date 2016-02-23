@@ -13,7 +13,7 @@ import java.util.concurrent.locks.StampedLock;
  * Knowledge:
  *
  * `StampedLock` 是 Java 8 引入的新的一种锁. 它像 `ReadWriteLock` 一样也支持读写锁.
- * 不同的是 `StampedLock` 在锁操作后会返回一个 `long` 类型的 stamp, 之后释放锁或者对
+ * 不同的是 `StampedLock` 在加锁操作后会返回一个 `long` 类型的 stamp, 之后释放锁或者对
  * 锁进行其他操作时都要用到这个 stamp. `StampedLock` 还支持乐观锁(optimistic locking).
  *
  * Stamped lock 并没有实现同步重入(reentrant synchronization)特性.
@@ -99,6 +99,32 @@ public class StampedLockExample {
         stopExecutor(executor);
     }
 
+    public void convertReadLockToWriteLock() {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        executor.submit(() -> {
+            long stamp = lock.readLock();
+
+            try {
+                if (null == dataMap.get("bar")) {
+                    lock.tryConvertToWriteLock(stamp);
+                    if (stamp == 0L) {
+                        System.out.println("Could not convert to write lock.");
+                        stamp = lock.writeLock();
+                    }
+
+                    dataMap.put("bar", "foo");
+                }
+
+                System.out.println("bar:" + dataMap.get("bar"));
+            } finally {
+                lock.unlock(stamp);
+            }
+        });
+
+        stopExecutor(executor);
+    }
+
     private void stopExecutor(ExecutorService executor) {
 
         try {
@@ -115,7 +141,14 @@ public class StampedLockExample {
 
     public static void main(String[] args) {
         StampedLockExample sample = new StampedLockExample();
+
+        System.out.println("- - - Read-Write Locking Using StampedLock");
         sample.readWriteLockingUsingStampedLock();
+
+        System.out.println("- - - Optimistic Locking Using StampedLock");
         sample.optimisticLockingInStampedLock();
+
+        System.out.println("- - - Convert a read lock into a write lock");
+        sample.convertReadLockToWriteLock();
     }
 }
